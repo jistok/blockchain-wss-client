@@ -8,12 +8,14 @@
     * Serves the stream up via its own websocket server
 
 1. GemFire
-    * Stores data in memory for real time dashboard
+    * Stores data in memory for real time dashboard (histogram, etc.)
+    * WAN replicated across > 1 IaaS (AWS, Azure, Google Cloud)
 
 1. GPDB
     * Warm data in heap tables
     * Cold data in S3 bucket
     * Large scale analytical queries, statistical, and machine learning analysis
+    * Example: graph analysis
 
 ## External dependencies
 
