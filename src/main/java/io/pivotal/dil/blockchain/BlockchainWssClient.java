@@ -36,7 +36,12 @@ public class BlockchainWssClient extends WebSocketClient {
 
 	@Override
 	public void onMessage(String message) {
-		System.out.println("received: " + message);
+		try {
+			BlockchainWssClientApplication.TXN_QUEUE.put(message);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println(message);
 	}
 
 	@Override
