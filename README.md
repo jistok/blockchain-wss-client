@@ -1,5 +1,12 @@
 # Websocket client for blockchain data, with integration into GemFire and GPDB
 
+## Ideas for applications
+
+* Graph analysis of blockchain transactions
+* Plot transaction volumes over time, overlaid onto other data (news, commodities, gold, stock market indexes)
+* Plot blockchain / USD value over time, possibly correlated as above
+* Look for features indicative of the rebalancing adjustment made approximately every 14 days
+
 ## Components with function
 
 1. Spring Boot app
@@ -15,7 +22,6 @@
     * Warm data in heap tables
     * Cold data in S3 bucket
     * Large scale analytical queries, statistical, and machine learning analysis
-    * Example: graph analysis
 
 ## External dependencies
 
