@@ -8,6 +8,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+
 public class BlockchainTxn {
 
 	private long lockTime;
@@ -23,15 +28,31 @@ public class BlockchainTxn {
 	private List<BlockchainItem> out;
 	// Derived from time field
 	private Date timeAsDate;
-	
+
+	// For the trip back to JSON
+	private static final ObjectMapper mapper;
+	static {
+		mapper = new ObjectMapper();
+		mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+	}
+
 	public BlockchainTxn() {
 		super();
 	}
 	
+	public String toJSON() throws JsonProcessingException {
+		return mapper.writeValueAsString(this);
+	}
+
 	public Date getTimeAsDate() {
 		return timeAsDate;
 	}
-	
+
+	@JsonGetter("timeAsDate")
+	public String getTimeAsString() {
+		return timeAsDate.toString();
+	}
+
 	/*
 	 * TODO: Get an instance from a JSON document
 	 */

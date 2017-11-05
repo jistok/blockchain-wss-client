@@ -8,6 +8,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+
 @SpringBootApplication
 public class BlockchainWssClientApplication {
 
@@ -42,8 +46,10 @@ public class BlockchainWssClientApplication {
 				if (txn != null) {
 					statusMsg = "Got a BlockchainTxn (timeAsDate: " + txn.getTimeAsDate().toString() + ")";
 				}
-				System.out.println(statusMsg);
-			} catch (InterruptedException e) {
+				System.out.println(statusMsg); // DEBUG
+				System.out.println(txn.toJSON()); // DEBUG
+				
+			} catch (InterruptedException | JsonProcessingException e) {
 				throw new RuntimeException(e);
 			}
 			s.broadcast(msg);
