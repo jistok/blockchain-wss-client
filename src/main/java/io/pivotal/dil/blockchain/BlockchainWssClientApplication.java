@@ -34,7 +34,15 @@ public class BlockchainWssClientApplication {
 		while (true) {
 			String msg;
 			try {
+				/*int qSiz = BlockchainWssClientApplication.TXN_QUEUE.size();
+				System.out.println("Queue Size: " + qSiz);*/
 				msg = BlockchainWssClientApplication.TXN_QUEUE.take();
+				BlockchainTxn txn = BlockchainTxn.fromJSON(msg);
+				String statusMsg = "No BlockchainTxn";
+				if (txn != null) {
+					statusMsg = "Got a BlockchainTxn (timeAsDate: " + txn.getTimeAsDate().toString() + ")";
+				}
+				System.out.println(statusMsg);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}

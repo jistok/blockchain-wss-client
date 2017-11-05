@@ -41,7 +41,7 @@ public class BlockchainWssClient extends WebSocketClient {
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println(message);
+		//System.out.println(message); // DEBUG
 	}
 
 	@Override
