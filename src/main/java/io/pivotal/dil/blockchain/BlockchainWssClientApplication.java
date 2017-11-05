@@ -8,10 +8,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-
 @SpringBootApplication
 public class BlockchainWssClientApplication {
 
@@ -22,7 +18,7 @@ public class BlockchainWssClientApplication {
 	protected static final BlockingQueue<String> TXN_QUEUE = new LinkedBlockingDeque<>(QUEUE_CAPACITY);
 
 	public static void main(String[] args) {
-		// Start our Websocket client to pull in transaction data
+		// Start our Websocket client to pull in transaction data and stick it into TXN_QUEUE
 		BlockchainWssClient c = null;
 		try {
 			c = new BlockchainWssClient(new URI(BLOCKCHAIN_URL));
@@ -31,31 +27,12 @@ public class BlockchainWssClientApplication {
 		}
 		c.connect();
 
-		// Start a Websocket server to broadcast these messages to clients
+		// Start a Websocket server to pull data from TXN_QUEUE and broadcast it to clients
 		BlockchainWssServer s = new BlockchainWssServer();
 		s.start();
 		System.out.println("Server started on port: " + s.getPort());
-		while (true) {
-			String msg;
-			try {
-				/*int qSiz = BlockchainWssClientApplication.TXN_QUEUE.size();
-				System.out.println("Queue Size: " + qSiz);*/
-				msg = BlockchainWssClientApplication.TXN_QUEUE.take();
-				BlockchainTxn txn = BlockchainTxn.fromJSON(msg);
-				String statusMsg = "No BlockchainTxn";
-				if (txn != null) {
-					statusMsg = "Got a BlockchainTxn (timeAsDate: " + txn.getTimeAsDate().toString() + ")";
-				}
-				System.out.println(statusMsg); // DEBUG
-				System.out.println(txn.toJSON()); // DEBUG
-				
-			} catch (InterruptedException | JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
-			s.broadcast(msg);
-		}
 
-		// WHY AM I RUNNING THIS AS A BOOT APP?
-		//SpringApplication.run(BlockchainWssClientApplication.class, args);
+		// Finally, the Boot app runs
+		SpringApplication.run(BlockchainWssClientApplication.class, args);
 	}
 }
