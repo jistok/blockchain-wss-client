@@ -83,3 +83,6 @@
 }
 ```
 
+## Potentially Useful References
+* An OReilly [title](http://chimera.labs.oreilly.com/books/1234000001802/ch05.html#tx_lifecycle)
+

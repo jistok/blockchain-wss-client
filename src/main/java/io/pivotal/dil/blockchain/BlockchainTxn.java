@@ -21,7 +21,7 @@ public class BlockchainTxn {
 	private long time; // Date date = new Date(time * 1000)
 	private long txIndex;
 	private int vinSz; // Size of inputs (see above)
-	private String hash; // Probably, the primary key
+	private String hash; // The primary key
 	private int voutSz; // Size of out (see below)
 	private String relayedBy; // An IP address: "0.0.0.0" or similar
 	private List<BlockchainInput> inputs;
