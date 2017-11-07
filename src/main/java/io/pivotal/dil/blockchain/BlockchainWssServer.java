@@ -9,6 +9,8 @@ import org.java_websocket.server.WebSocketServer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.pivotal.dil.blockchain.entity.BlockchainTxn;
+
 public class BlockchainWssServer extends WebSocketServer {
 
 	private static final int DEFAULT_PORT = 18080;

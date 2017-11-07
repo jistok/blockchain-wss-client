@@ -85,4 +85,5 @@
 
 ## Potentially Useful References
 * An OReilly [title](http://chimera.labs.oreilly.com/books/1234000001802/ch05.html#tx_lifecycle)
+* To redirect from a Spring Boot endpoint to our WS server, you can just return `redirect:<uri>` from a `@Controller`, or a `RedirectView`
 

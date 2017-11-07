@@ -1,4 +1,4 @@
-package io.pivotal.dil.blockchain;
+package io.pivotal.dil.blockchain.entity;
 
 import java.util.ArrayList;
 import java.util.Date;
