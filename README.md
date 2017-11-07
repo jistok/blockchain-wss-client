@@ -91,7 +91,7 @@
 * Set `PATH`: `cd ./pivotal-gemfire-9.1.1/ ; export PATH=$PWD/bin:$PATH`
 * Change back into this GitHub repo directory: `popd`
 * Start a locator: `gfsh -e "start locator --name=locator"`
-* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml"`
+* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml --locators=localhost[10334]"`
 * Start up the Pulse web UI: `gfsh -e "start pulse"`
 * This should direct your browser to the Pulse UI, where you enter _admin_ for user name, and _admin_ for password
 

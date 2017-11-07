@@ -16,7 +16,16 @@ public class BlockchainWssClientApplication {
 
 	// This is how transactions get passed from client to server
 	protected static final BlockingQueue<String> TXN_QUEUE = new LinkedBlockingDeque<>(QUEUE_CAPACITY);
-
+	
+	@SuppressWarnings("unused")
+	private BlockchainWssServer wsServer;
+	
+	public BlockchainWssClientApplication(BlockchainWssServer wsServer) {
+		this.wsServer = wsServer;
+		wsServer.start();
+		System.out.println("Server started on port: " + wsServer.getPort());
+	}
+	
 	public static void main(String[] args) {
 		// Start our Websocket client to pull in transaction data and stick it into TXN_QUEUE
 		BlockchainWssClient c = null;
@@ -26,11 +35,6 @@ public class BlockchainWssClientApplication {
 			throw new RuntimeException(e);
 		}
 		c.connect();
-
-		// Start a Websocket server to pull data from TXN_QUEUE and broadcast it to clients
-		BlockchainWssServer s = new BlockchainWssServer();
-		s.start();
-		System.out.println("Server started on port: " + s.getPort());
 
 		// Finally, the Boot app runs
 		SpringApplication.run(BlockchainWssClientApplication.class, args);

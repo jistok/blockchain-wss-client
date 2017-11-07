@@ -53,7 +53,7 @@ public class BlockchainTxn {
 		return timeAsDate;
 	}
 
-	@JsonGetter("timeAsDate")
+	@JsonGetter("time_as_date")
 	public String getTimeAsString() {
 		return timeAsDate.toString();
 	}
