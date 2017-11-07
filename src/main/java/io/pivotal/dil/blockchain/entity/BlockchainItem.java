@@ -15,16 +15,25 @@ import org.json.JSONObject;
      }
  */
 public class BlockchainItem {
-	
-	// FIXME: What's the primary key here?
+
 	private boolean spent;
 	private long txIndex;
 	private int type;
-	private String addr;
+	private String addr; // Possible PK? Maybe, combined with txIndex?
 	private long value;
 	private int n;
 	private String script;
 
+	// The ID used to put/get these
+	public String getId() {
+		return genId(addr, txIndex);
+	}
+
+	// For use in looking one of these up by ID
+	public static String genId(String addr, long txIndex) {
+		return addr + "-" + txIndex; 
+	}
+	
 	public BlockchainItem() {
 	}
 
@@ -85,15 +94,9 @@ public class BlockchainItem {
 	}
 
 	/*
-	 {
-        "spent" : true,
-        "tx_index" : 297927628,
-        "type" : 0,
-        "addr" : "3FnVYDyPt2NPWN8ttpEbPeTiYcMNcVZKoZ",
-        "value" : 127870000,
-        "n" : 2,
-        "script" : "a9149a9ae48d0d64b1fdae3a32e72da59b65cc31c6ed87"
-      }
+	 * { "spent" : true, "tx_index" : 297927628, "type" : 0, "addr" :
+	 * "3FnVYDyPt2NPWN8ttpEbPeTiYcMNcVZKoZ", "value" : 127870000, "n" : 2, "script"
+	 * : "a9149a9ae48d0d64b1fdae3a32e72da59b65cc31c6ed87" }
 	 */
 	public static BlockchainItem fromJSONObject(JSONObject jsonObject) {
 		BlockchainItem rv = null;

@@ -28,6 +28,11 @@ public class BlockchainTxn {
 	private List<BlockchainItem> out;
 	// Derived from time field
 	private Date timeAsDate;
+	
+	// The ID used to put/get these
+	public String getId() {
+		return hash;
+	}
 
 	// For the trip back to JSON
 	private static final ObjectMapper mapper;
