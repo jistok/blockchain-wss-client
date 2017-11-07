@@ -16,3 +16,5 @@ target/
 *.ipr
 
 .*.swp
+locator
+server
