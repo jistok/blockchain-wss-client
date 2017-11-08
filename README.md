@@ -101,4 +101,5 @@
 * A [note](https://stackoverflow.com/questions/39202243/how-to-create-composite-primary-key-scenario-in-gemfire-region) on composite primary keys in Gemfire
 * Video: [Demystifying High Availability with Apache Geode](https://youtu.be/yachT1xoQww)
 * Video: [How To Download and Run Apache Geode](https://youtu.be/zpko_fROWrU)
+* [GitHub repo](https://github.com/kdunn926/blockchainviz) for the Javascript UI
 
