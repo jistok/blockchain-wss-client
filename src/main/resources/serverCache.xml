@@ -3,6 +3,14 @@
 	xsi:schemaLocation="http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	version="1.0">
 
+	<disk-store name="pdx">
+		<disk-dirs>
+			<disk-dir>./pdx</disk-dir>
+		</disk-dirs>
+	</disk-store>
+
+	<pdx disk-store-name="pdx" persistent="true" read-serialized="true" />
+
 	<region name="BlockchainItem">
 		<region-attributes refid="REPLICATE" />
 	</region>
