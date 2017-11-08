@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gemstone.gemfire.cache.Region;
 
+import io.pivotal.dil.blockchain.entity.BlockchainInput;
 import io.pivotal.dil.blockchain.entity.BlockchainItem;
 import io.pivotal.dil.blockchain.entity.BlockchainTxn;
 
@@ -76,9 +77,17 @@ public class BlockchainWssServer extends WebSocketServer {
 						BlockchainTxn txn = BlockchainTxn.fromJSON(msg);
 						String statusMsg = "No BlockchainTxn";
 						if (txn != null) {
-							// Persist in Gemfire
 							statusMsg = "Got a BlockchainTxn (timeAsDate: " + txn.getTimeAsDate().toString() + ")";
+							// Persist BlockchainTxn in Gemfire
 							blockchainTxnRegion.put(txn.getId(), txn);
+							// Persist all the BlockchainItems in Gemfire
+							for (BlockchainInput in : txn.getInputs()) {
+								BlockchainItem item = in.getPrevOut();
+								blockchainItemRegion.put(item.getId(), item);
+							}
+							for (BlockchainItem item : txn.getOut()) {
+								blockchainItemRegion.put(item.getId(), item);
+							}
 						}
 						System.out.println(statusMsg); // DEBUG
 						System.out.println(txn.toJSON()); // DEBUG
