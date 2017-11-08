@@ -70,6 +70,9 @@ public class BlockchainWssServer extends WebSocketServer {
 		System.out.println("Server started!");
 		new Thread(new Runnable() {
 			public void run() {
+				long nMessages = 0;
+				long nMessagesPerReport = 100;
+				long lastTimeReported = System.currentTimeMillis();
 				while (true) {
 					String msg;
 					try {
@@ -77,6 +80,7 @@ public class BlockchainWssServer extends WebSocketServer {
 						BlockchainTxn txn = BlockchainTxn.fromJSON(msg);
 						String statusMsg = "No BlockchainTxn";
 						if (txn != null) {
+							nMessages++;
 							statusMsg = "Got a BlockchainTxn (timeAsDate: " + txn.getTimeAsDate().toString() + ")";
 							// Persist BlockchainTxn in Gemfire
 							blockchainTxnRegion.put(txn.getId(), txn);
@@ -89,9 +93,16 @@ public class BlockchainWssServer extends WebSocketServer {
 								blockchainItemRegion.put(item.getId(), item);
 							}
 						}
-						System.out.println(statusMsg); // DEBUG
-						System.out.println(txn.toJSON()); // DEBUG
-					} catch (InterruptedException | JsonProcessingException e) {
+						if (nMessages > 0L && (nMessages % nMessagesPerReport == 0)) {
+							long now = System.currentTimeMillis();
+							double dtSec = (now - lastTimeReported) / 1.0E+03;
+							System.out.printf("Total messages so far: %d\n" + "Message rate: %.3f per second\n",
+									nMessages, nMessagesPerReport / dtSec);
+							lastTimeReported = now;
+						}
+						// System.out.println(statusMsg); // DEBUG
+						// System.out.println(txn.toJSON()); // DEBUG
+					} catch (InterruptedException /* | JsonProcessingException */ e) {
 						throw new RuntimeException(e);
 					}
 					broadcast(msg);
