@@ -106,7 +106,12 @@ function onLoad() {
    //beginAddNodesLoop(graph);
    l = layout;
 
-    var blockchainWebSocket = $.simpleWebSocket({ url: 'ws://localhost:18080' , dataType: 'json' });
+    var blockchainWebSocket = $.simpleWebSocket(
+      {
+        url: 'ws://' + window.location.href.split('//')[1].split(':')[0] + ':18080'
+        , dataType: 'json'
+      }
+    );
 
     var maxNodes = 5000;
     var i = 0;
