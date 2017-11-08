@@ -102,4 +102,7 @@
 * Video: [Demystifying High Availability with Apache Geode](https://youtu.be/yachT1xoQww)
 * Video: [How To Download and Run Apache Geode](https://youtu.be/zpko_fROWrU)
 * [GitHub repo](https://github.com/kdunn926/blockchainviz) for the Javascript UI
+* Export data from a region: `gfsh>export data --region=/BlockchainItem --file=/tmp/BlockchainItem.gfd --member=server`
+* Import data to a region: `gfsh>import data --region=/BlockchainItem --file=/tmp/BlockchainItem.gfd --member=server`
+* Connect to a locator (from gfsh): `gfsh>connect --locator=localhost[10334]`
 
