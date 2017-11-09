@@ -23,8 +23,6 @@ import org.java_websocket.handshake.ServerHandshake;
  *
  */
 public class BlockchainWssClient extends WebSocketClient {
-	
-	private static final long TIME_TO_WAIT_BEFORE_RECONNECTING_MS = 5000L;
 
 	public BlockchainWssClient(URI serverURI) {
 		super(serverURI);
@@ -48,16 +46,9 @@ public class BlockchainWssClient extends WebSocketClient {
 
 	@Override
 	public void onClose(int code, String reason, boolean remote) {
-		// The codecodes are documented in class org.java_websocket.framing.CloseFrame
+		// The codecodes are documented in class org.java_websocket.framing.
 		System.out.println(
 				"Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
-		System.out.printf("Sleeping %d ms before attempting to re-connect ...");
-		try {
-			Thread.sleep(TIME_TO_WAIT_BEFORE_RECONNECTING_MS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		this.connect();
 	}
 
 	@Override
