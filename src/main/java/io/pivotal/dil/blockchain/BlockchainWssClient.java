@@ -1,8 +1,11 @@
 package io.pivotal.dil.blockchain;
 
 import java.net.URI;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -23,6 +26,8 @@ import org.java_websocket.handshake.ServerHandshake;
  *
  */
 public class BlockchainWssClient extends WebSocketClient {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(WebSocketClient.class);
 
 	public BlockchainWssClient(URI serverURI) {
 		super(serverURI);
@@ -30,7 +35,7 @@ public class BlockchainWssClient extends WebSocketClient {
 
 	@Override
 	public void onOpen(ServerHandshake handshakedata) {
-		System.out.println("opened connection");
+		LOG.info("opened connection");
 		this.send("{\"op\":\"unconfirmed_sub\"}");
 	}
 
@@ -41,13 +46,13 @@ public class BlockchainWssClient extends WebSocketClient {
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-		//System.out.println(message); // DEBUG
+		//LOG.info(message); // DEBUG
 	}
 
 	@Override
 	public void onClose(int code, String reason, boolean remote) {
 		// The codecodes are documented in class org.java_websocket.framing.
-		System.out.println(
+		LOG.info(
 				"Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
 	}
 

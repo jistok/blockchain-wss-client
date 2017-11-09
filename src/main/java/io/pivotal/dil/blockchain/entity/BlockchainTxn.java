@@ -59,10 +59,7 @@ public class BlockchainTxn {
 	public String getTimeAsString() {
 		return timeAsDate.toString();
 	}
-
-	/*
-	 * TODO: Get an instance from a JSON document
-	 */
+	
 	public static BlockchainTxn fromJSON(String jsonString) {
 		BlockchainTxn rv = null;
 		try {

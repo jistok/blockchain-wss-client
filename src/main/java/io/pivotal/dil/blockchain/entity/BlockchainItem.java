@@ -2,6 +2,8 @@ package io.pivotal.dil.blockchain.entity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
     {
@@ -23,6 +25,8 @@ public class BlockchainItem {
 	private long value;
 	private int n;
 	private String script;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(BlockchainItem.class);
 
 	// The ID used to put/get these
 	public String getId() {
@@ -111,7 +115,7 @@ public class BlockchainItem {
 			rv.script = jsonObject.getString("script");
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("JSON: " + jsonObject.toString());
+			LOG.error("JSON: " + jsonObject.toString());
 		}
 		return rv;
 	}

@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +26,9 @@ import io.pivotal.dil.blockchain.entity.BlockchainTxn;
 public class BlockchainWssServer extends WebSocketServer {
 
 	private static final int DEFAULT_PORT = 18080;
-
 	private static final long TIME_TO_WAIT_BEFORE_RECONNECTING_MS = 5000L;
-
 	private static final long QUEUE_MAX_WAIT_TIME_SECONDS = 2L;
+	private static final Logger LOG = LoggerFactory.getLogger(BlockchainWssServer.class);
 
 	@Autowired
 	private Region<String /* hash */, BlockchainTxn> blockchainTxnRegion;
@@ -48,26 +49,26 @@ public class BlockchainWssServer extends WebSocketServer {
 	@Override
 	public void onOpen(WebSocket conn, ClientHandshake handshake) {
 		broadcast("new connection: " + handshake.getResourceDescriptor());
-		System.out.println(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
+		LOG.info(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
 	}
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
 		String msg = conn + " has disconnected";
 		broadcast(msg);
-		System.out.println(msg);
+		LOG.info(msg);
 	}
 
 	@Override
 	public void onMessage(WebSocket conn, String message) {
 		broadcast(message);
-		System.out.println(conn + ": " + message);
+		LOG.info(conn + ": " + message);
 	}
 
 	@Override
 	public void onMessage(WebSocket conn, ByteBuffer message) {
 		broadcast(message.array());
-		System.out.println(conn + ": " + message);
+		LOG.info(conn + ": " + message);
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class BlockchainWssServer extends WebSocketServer {
 		// Start our Websocket client to pull in transaction data and stick it into
 		// TXN_QUEUE
 		try {
-			System.out.println("startWsClient(): getting new instance and connecting");
+			LOG.info("startWsClient(): getting new instance and connecting");
 			if (wsClient != null) {
 				wsClient.close();
 				wsClient = null;
@@ -93,7 +94,7 @@ public class BlockchainWssServer extends WebSocketServer {
 
 	@Override
 	public void onStart() {
-		System.out.println("Server started!");
+		LOG.info("Server started!");
 		startWsClient(); // Start client up once here
 		new Thread(new Runnable() {
 			public void run() {
@@ -132,13 +133,13 @@ public class BlockchainWssServer extends WebSocketServer {
 						if (nMessages > 0L && (nMessages % nMessagesPerReport == 0)) {
 							long now = System.currentTimeMillis();
 							double dtSec = (now - lastTimeReported) / 1.0E+03;
-							System.out.printf("Total messages so far: %d\n" + "Message rate: %.3f per second\n",
-									nMessages, nMessagesPerReport / dtSec);
+							LOG.info(String.format("Transactions so far: %d (rate: %.3f per second)", nMessages,
+									nMessagesPerReport / dtSec));
 							lastTimeReported = now;
 						}
-						// System.out.println(statusMsg); // DEBUG
-						// System.out.println(txn.toJSON()); // DEBUG
-					} catch (InterruptedException /* | JsonProcessingException */ e) {
+						LOG.debug(statusMsg);
+						LOG.debug(txn.toJSON());
+					} catch (InterruptedException | JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}
 				}
