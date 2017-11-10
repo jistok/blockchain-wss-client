@@ -40,9 +40,7 @@
 
 1. Build: `./mvnw clean package -DskipTests`
 
-1. Run: `java -jar ./target/blockchain-wss-client-0.0.1-SNAPSHOT.jar`
-
-1. Start it up: `./start_blockchain_app.sh`
+1. Run: `java -jar ./target/blockchain-wss-client-0.0.1-SNAPSHOT.jar` (or, use [this](./start_blockchain_app.sh))
 
 **NOTE:** this app listens on ports 8080 (HTTP) and 18080 (WS server)
 
