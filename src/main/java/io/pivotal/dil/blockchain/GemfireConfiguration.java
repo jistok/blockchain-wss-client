@@ -1,6 +1,11 @@
 package io.pivotal.dil.blockchain;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,38 +21,52 @@ import io.pivotal.dil.blockchain.entity.BlockchainTxn;
 
 @Configuration
 public class GemfireConfiguration {
-	
-    @Value("${gemfire.locator.host:localhost}")
-    private String locatorHost;
 
-    @Value("${gemfire.locator.port:10334}")
-    private Integer locatorPort;
+	@Autowired
+	private PropertyConfig propertyConfig;
 
-    // Create a connection - client/server topology
-    @Bean
-    public ClientCache cache() {
-        ClientCacheFactory ccf = new ClientCacheFactory();
+	private static final Logger LOG = LoggerFactory.getLogger(GemfireConfiguration.class);
 
-        ccf.addPoolLocator(locatorHost, locatorPort);
+	// Create a connection - client/server topology
+	@Bean
+	public ClientCache cache() {
+		LOG.info("creating cache");
+		ClientCacheFactory ccf = new ClientCacheFactory();
+		String locators = propertyConfig.locators;
+		Pattern pat = Pattern.compile("^\\s*([^\\[]+)\\[(\\d+)\\]\\s*$");
+		for (String st : locators.split(",")) {
+			Matcher mat = pat.matcher(st);
+			if (mat.matches()) {
+			String host = mat.group(1);
+			int port = Integer.parseInt(mat.group(2));
+			LOG.info("creating cache: adding locator: host={}, port={}", host, port);
+			ccf.addPoolLocator(host, port);
+			} else {
+				throw new RuntimeException("Unable to match locator HOST[PORT] in \"" + st + "\"");
+			}
+		}
+		ccf.set("security-client-auth-init",
+				"io.pivotal.dil.blockchain.ClientAuthInitialize.create");
+		ccf.set("security-username", propertyConfig.username);
+		ccf.set("security-password", propertyConfig.password);
+		ccf.setPdxPersistent(false);
+		ccf.setPdxReadSerialized(false);
+		ccf.setPdxSerializer(new ReflectionBasedAutoSerializer("io.pivotal.dil.blockchain.entity.*"));
+		return ccf.create();
+	}
 
-        ccf.setPdxPersistent(false);
-        ccf.setPdxReadSerialized(false);
-        ccf.setPdxSerializer(new ReflectionBasedAutoSerializer("io.pivotal.dil.blockchain.entity.*"));
-
-        return ccf.create();
-    }
-
-    // Get regions configured as non-caching proxies (data remains remote; a pure client-server topology)
-    @Bean
-    public Region<String /* hash */, BlockchainTxn> blockchainTxnRegion(ClientCache cache) {
+	// Get regions configured as non-caching proxies (data remains remote; a pure
+	// client-server topology)
+	@Bean
+	public Region<String /* hash */, BlockchainTxn> blockchainTxnRegion(ClientCache cache) {
 		ClientRegionFactory<String, BlockchainTxn> crf = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-        return crf.create("BlockchainTxn");
-    }
+		return crf.create("BlockchainTxn");
+	}
 
-    @Bean
-    public Region<String /* BlockchainItem.genId() */, BlockchainItem> blockchainItemRegion(ClientCache cache) {
+	@Bean
+	public Region<String /* BlockchainItem.genId() */, BlockchainItem> blockchainItemRegion(ClientCache cache) {
 		ClientRegionFactory<String, BlockchainItem> crf = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-        return crf.create("BlockchainItem");
-    }
+		return crf.create("BlockchainItem");
+	}
 
 }

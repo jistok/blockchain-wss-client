@@ -34,6 +34,16 @@
     $ mvn clean install
     ```
 
+## Build this app
+
+1. Edit the [properties file](./src/main/resources/application.properties) to suit your installation
+
+1. Build: `./mvnw clean package -DskipTests`
+
+1. Run: `java -jar ./target/blockchain-wss-client-0.0.1-SNAPSHOT.jar`
+
+**NOTE:** this app listens on ports 8080 (HTTP) and 18080 (WS server)
+
 ## Data sample
 
 ```
