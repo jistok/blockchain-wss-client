@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.gemstone.gemfire.cache.Region;
+import org.apache.geode.cache.Region;
 
 import io.pivotal.dil.blockchain.entity.BlockchainInput;
 import io.pivotal.dil.blockchain.entity.BlockchainItem;

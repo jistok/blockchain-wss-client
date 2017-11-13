@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.gemstone.gemfire.cache.Region;
+import org.apache.geode.cache.Region;
 
 import io.pivotal.dil.blockchain.entity.BlockchainItem;
 import io.pivotal.dil.blockchain.entity.BlockchainTxn;

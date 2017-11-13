@@ -17,10 +17,11 @@
 1. GemFire
     * Stores data in memory for real time dashboard (histogram, etc.)
     * WAN replicated across > 1 IaaS (AWS, Azure, Google Cloud)
+    * Uses an _AsyncEventListener_ to push Blockchain Transactions into an S3 bucket
 
 1. GPDB
     * Warm data in heap tables
-    * Cold data in S3 bucket
+    * Cold data in S3 bucket (see note on S3, above)
     * Large scale analytical queries, statistical, and machine learning analysis
 
 ## External dependencies
@@ -93,7 +94,7 @@
 }
 ```
 
-## Install and start GemFire
+## Install, configure, and start GemFire
 
 * Save this directory: `pushd .`
 * Download the archive from Pivotal Network
@@ -101,7 +102,9 @@
 * Set `PATH`: `cd ./pivotal-gemfire-9.1.1/ ; export PATH=$PWD/bin:$PATH`
 * Change back into this GitHub repo directory: `popd`
 * Start a locator: `gfsh -e "start locator --name=locator --classpath=$PWD/target/classes"`
-* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml --locators=localhost[10334] --classpath=$PWD/target/classes"`
+* Edit the [server cache XML file](./src/main/resources/serverCache.xml), replacing the following tokens with appropriate values: `us-west-2, YOUR_S3_BUCKET_NAME, YOUR_S3_ACCESS_KEY_ID, YOUR_S3_SECRET_KEY`
+* Generate the string passed via `--classpath=` when staring the server: `./generate_classpath_for_gemfire_server.sh`.  That last line of output is what you replace `CLASSPATH` with in the next step.  This step basically dumps all JAR file dependencies into the `./lib` directory of this project (it also creates this directory).
+* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml --locators=localhost[10334] --classpath=CLASSPATH"`
 * Start up the Pulse web UI: `gfsh -e "start pulse"`
 * This should direct your browser to the Pulse UI, where you enter _admin_ for user name, and _admin_ for password
 

@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.client.ClientCache;
-import com.gemstone.gemfire.cache.client.ClientCacheFactory;
-import com.gemstone.gemfire.cache.client.ClientRegionFactory;
-import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
-import com.gemstone.gemfire.pdx.ReflectionBasedAutoSerializer;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.client.ClientCacheFactory;
+import org.apache.geode.cache.client.ClientRegionFactory;
+import org.apache.geode.cache.client.ClientRegionShortcut;
+import org.apache.geode.pdx.ReflectionBasedAutoSerializer;
 
 import io.pivotal.dil.blockchain.entity.BlockchainItem;
 import io.pivotal.dil.blockchain.entity.BlockchainTxn;
@@ -50,7 +50,7 @@ public class GemfireConfiguration {
 		ccf.set("security-username", propertyConfig.username);
 		ccf.set("security-password", propertyConfig.password);
 		ccf.setPdxPersistent(false);
-		ccf.setPdxReadSerialized(false);
+		ccf.setPdxReadSerialized(true); /* REQUIRED if using S3JSONAsyncEventListener */
 		ccf.setPdxSerializer(new ReflectionBasedAutoSerializer("io.pivotal.dil.blockchain.entity.*"));
 		return ccf.create();
 	}

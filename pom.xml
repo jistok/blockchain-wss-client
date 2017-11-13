@@ -22,13 +22,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<geode.version>1.2.0</geode.version>
 	</properties>
 
 	<dependencies>
+	
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-gemfire</artifactId>
+			<groupId>org.apache.geode</groupId>
+			<artifactId>geode-core</artifactId>
+			<version>${geode.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -54,7 +58,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.10.49</version>
+			<version>1.11.228</version>
 		</dependency>
 
 	</dependencies>
@@ -65,8 +69,20 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!--
+			The following is for copying all the JAR files into the lib directory.
+			To use this, run `mvn dependency:copy-dependencies`
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<outputDirectory>
+						${project.basedir}/lib
+					</outputDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 
 </project>

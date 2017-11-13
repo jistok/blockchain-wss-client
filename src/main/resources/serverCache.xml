@@ -3,20 +3,47 @@
 	xsi:schemaLocation="http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd"
 	version="1.0">
 
+	<async-event-queue id="s3q">
+		<async-event-listener>
+			<class-name>io.pivotal.dil.blockchain.S3JSONAsyncEventListener</class-name>
+			<parameter name="awsRegion">
+				<string>us-west-2</string>
+			</parameter>
+			<parameter name="s3Bucket">
+				<string>YOUR_S3_BUCKET_NAME</string>
+			</parameter>
+			<parameter name="s3AccessKeyID">
+				<string>YOUR_S3_ACCESS_KEY_ID</string>
+			</parameter>
+			<parameter name="s3SecretAccessKey">
+				<string>YOUR_S3_SECRET_KEY</string>
+			</parameter>
+		</async-event-listener>
+	</async-event-queue>
+
 	<disk-store name="pdx">
 		<disk-dirs>
 			<disk-dir>./pdx</disk-dir>
 		</disk-dirs>
 	</disk-store>
 
-	<pdx disk-store-name="pdx" persistent="true" read-serialized="true" />
+	<pdx disk-store-name="pdx" persistent="true" read-serialized="true">
+	<pdx-serializer>
+      <class-name>
+       org.apache.geode.pdx.ReflectionBasedAutoSerializer
+      </class-name>
+      <parameter name="classes">
+      <string>io.pivotal.dil.blockchain.entity.*</string>
+     </parameter>
+  </pdx-serializer>
+	</pdx>
 
 	<region name="BlockchainItem">
 		<region-attributes refid="REPLICATE" />
 	</region>
 
 	<region name="BlockchainTxn">
-		<region-attributes refid="REPLICATE" />
+		<region-attributes refid="REPLICATE" async-event-queue-ids="s3q" />
 	</region>
 
 	<resource-manager eviction-heap-percentage="70"
