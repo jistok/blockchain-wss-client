@@ -3,8 +3,12 @@ package io.pivotal.dil.blockchain;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.geode.cache.Declarable;
 import org.apache.geode.cache.Operation;
@@ -29,6 +33,11 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 	private AmazonS3 client;
 	private String bucketName;
 
+	private List<String> jsonEventList;
+	private static final int S3_BATCH_SIZE = 1000;
+	private static final BlockingQueue<String> EVENT_QUEUE = new LinkedBlockingQueue<>(S3_BATCH_SIZE);
+	private static final long QUEUE_OFFER_TIMEOUT_MS = 5L;
+
 	private static final Logger LOG = LoggerFactory.getLogger(S3JSONAsyncEventListener.class);
 
 	public S3JSONAsyncEventListener() {
@@ -43,6 +52,7 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 	 */
 	@Override
 	public void init(Properties props) {
+		jsonEventList = new ArrayList<>(S3_BATCH_SIZE);
 		String awsRegion = props.getProperty("awsRegion", Regions.US_WEST_2.name());
 		bucketName = props.getProperty("s3Bucket");
 		LOG.info("init: awsRegion={}, s3Bucket={}", awsRegion, bucketName);
@@ -59,13 +69,10 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 	public boolean processEvents(List<AsyncEvent> events) {
 		LOG.info("processEvents: events.size={}", events.size());
 		boolean rv = true;
-		Operation op;
-		Object value = null;
-		String  valueAsJson = "{}";
 		try {
 			for (AsyncEvent evt : events) {
 				LOG.debug("processEvents: evt={}", evt);
-				op = evt.getOperation();
+				Operation op = evt.getOperation();
 				String regionName = evt.getRegion().getName();
 
 				Object ok = evt.getKey();
@@ -77,20 +84,25 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 				String path = regionName + "/" + key;
 
 				if ((op.isCreate() || op.isUpdate()) && !op.isLoad()) {
-					value = evt.getDeserializedValue(); // TYPE: org.apache.geode.pdx.internal.PdxInstanceImpl
-					valueAsJson = ((BlockchainTxn) ((PdxInstance) value).getObject()).toJSON();
-					int len = valueAsJson.length();
-					LOG.info("processEvents: put: key={}, len={}, regionName={}", key, len, regionName);
-					ObjectMetadata meta = new ObjectMetadata();
-					meta.setContentLength(len);
-					meta.setContentType("application/json");
-					InputStream bis = new ByteArrayInputStream(valueAsJson.getBytes(StandardCharsets.UTF_8.name()));
-					client.putObject(bucketName, path, bis, meta);
-				} else if (op.isDestroy() && !(op.isEviction() || op.isExpiration())) {
-					LOG.info("processEvents: delete: key={}, regionName={}", key, regionName);
-					client.deleteObject(bucketName, path);
-				} else {
-					LOG.info("processEvents: NOT a create, update, or destroy: evt={}", evt);
+					PdxInstance value = (PdxInstance) evt.getDeserializedValue();
+					String jsonStr = ((BlockchainTxn) value.getObject()).toJSON();
+					synchronized (EVENT_QUEUE) {
+						if (!EVENT_QUEUE.offer(jsonStr, QUEUE_OFFER_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+							jsonEventList.clear();
+							EVENT_QUEUE.drainTo(jsonEventList);
+							String entireBatchOfJson = String.join("\n",
+									jsonEventList.toArray(new String[jsonEventList.size()]));
+							int len = entireBatchOfJson.length();
+							LOG.info("processEvents: put: key={}, len={}, regionName={}", key, len, regionName);
+							ObjectMetadata meta = new ObjectMetadata();
+							meta.setContentLength(len);
+							meta.setContentType(/* "application/json" */ "text/plain");
+							InputStream bis = new ByteArrayInputStream(
+									entireBatchOfJson.getBytes(StandardCharsets.UTF_8.name()));
+							client.putObject(bucketName, path, bis, meta);
+							EVENT_QUEUE.put(jsonStr);
+						}
+					}
 				}
 			}
 		} catch (Exception x) {
