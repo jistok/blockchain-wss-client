@@ -39,7 +39,10 @@ CREATE EXTERNAL TABLE blockchain_txn_s3
 
 -- Only the data for November 14, 2017:
 LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/20171114 config=/home/gpadmin/s3.conf')
+--LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/20171115 config=/home/gpadmin/s3.conf')
 FORMAT 'TEXT' (DELIMITER 'OFF' NULL '\N' ESCAPE '\');
+
+-- TODO: Use the above approach to build up an external partition setup
 
 -- Below are some query examples based on the JSON capability
 
@@ -49,4 +52,37 @@ SELECT (txn->>'time_as_date')::TIMESTAMP WITH TIME ZONE FROM blockchain_txn_s3 L
 -- Try to get to the elements of the arrays
 -- See https://stackoverflow.com/questions/22736742/query-for-array-elements-inside-json-type
 SELECT txn->>'hash', JSON_ARRAY_ELEMENTS(txn->'inputs') FROM blockchain_txn_s3 LIMIT 5;
+
+-- From Alastair Turner
+/*
+item_body | {"spent":true,"tx_index":301154438,"type":0,"addr":"1MLVLhwWyq6FjgeD9akgnPLHo4e4bTqpB4","value":1404965648,"n":0,"script":"76a914df121366c1c71a92110c5e19116549f8d267cf9d88ac","id":"1MLVLhwWyq6FjgeD9akgnPLHo4e4bTqpB4-301154438"}
+*/
+WITH inputs AS (
+  SELECT txn->>'hash' AS hash, 'in'::varchar AS direction, json_array_elements(json_extract_path(txn, 'inputs'))->'prev_out' AS item_body
+    FROM blockchain_txn_s3
+),
+outputs AS (
+  SELECT txn->>'hash' AS hash, 'out'::varchar AS direction, json_array_elements(json_extract_path(txn, 'out')) AS item_body
+    FROM blockchain_txn_s3
+),
+all_items AS (
+    SELECT * FROM inputs
+  UNION ALL
+    SELECT * FROM outputs
+)
+SELECT
+  -- NOTE: this would be the DDL for the blockchain_item table
+  (item_body->>'id')::TEXT id -- This is synthetic: addr || '-' || tx_index (see the BlockchainItem class)
+  , hash -- This is the FK to the parent BlockchainTxn
+  , direction
+  , (item_body->>'spent')::BOOLEAN spent
+  , (item_body->>'tx_index') tx_index
+  , (item_body->>'tx_index')::BIGINT tx_index
+  , (item_body->>'type')::INT type
+  , (item_body->>'addr') addr
+  , (item_body->>'value')::BIGINT value
+  , (item_body->>'n')::INT n
+  , (item_body->>'script')::TEXT script
+  FROM all_items LIMIT 5;
+
 
