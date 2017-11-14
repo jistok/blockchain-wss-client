@@ -3,6 +3,8 @@ package io.pivotal.dil.blockchain;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -37,6 +39,9 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 	private static final int S3_BATCH_SIZE = 1000;
 	private static final BlockingQueue<String> EVENT_QUEUE = new LinkedBlockingQueue<>(S3_BATCH_SIZE);
 	private static final long QUEUE_OFFER_TIMEOUT_MS = 5L;
+	
+	// File names for S3 encode the date of the last transaction in the batch
+	private final DateFormat DATE_FORMAT_FOR_S3_FILENAMES = new SimpleDateFormat("yyyyMMdd-HHmmss");
 
 	private static final Logger LOG = LoggerFactory.getLogger(S3JSONAsyncEventListener.class);
 
@@ -79,13 +84,12 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 				if (ok.getClass() != String.class) {
 					throw new IllegalArgumentException("Only String keys are supported: " + ok);
 				}
-
 				String key = ok.toString();
-				String path = regionName + "/" + key;
 
-				if ((op.isCreate() || op.isUpdate()) && !op.isLoad()) {
+				if ((op.isCreate() || op.isUpdate()) && !op.isLoad()) { // TODO: Still fuzzy on these qualifications
 					PdxInstance value = (PdxInstance) evt.getDeserializedValue();
-					String jsonStr = ((BlockchainTxn) value.getObject()).toJSON();
+					BlockchainTxn txn = (BlockchainTxn) value.getObject();
+					String jsonStr = txn.toJSON();
 					synchronized (EVENT_QUEUE) {
 						if (!EVENT_QUEUE.offer(jsonStr, QUEUE_OFFER_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
 							jsonEventList.clear();
@@ -97,6 +101,7 @@ public class S3JSONAsyncEventListener implements AsyncEventListener, Declarable 
 							ObjectMetadata meta = new ObjectMetadata();
 							meta.setContentLength(len);
 							meta.setContentType(/* "application/json" */ "text/plain");
+							String path = regionName + "/" + DATE_FORMAT_FOR_S3_FILENAMES.format(txn.getTimeAsDate());
 							InputStream bis = new ByteArrayInputStream(
 									entireBatchOfJson.getBytes(StandardCharsets.UTF_8.name()));
 							client.putObject(bucketName, path, bis, meta);

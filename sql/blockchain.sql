@@ -34,7 +34,19 @@ CREATE EXTERNAL TABLE blockchain_txn_s3
 (
   txn JSON
 )
-LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn config=/home/gpadmin/s3.conf')
+-- All the data:
+-- LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn config=/home/gpadmin/s3.conf')
+
+-- Only the data for November 14, 2017:
+LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/20171114 config=/home/gpadmin/s3.conf')
 FORMAT 'TEXT' (DELIMITER 'OFF' NULL '\N' ESCAPE '\');
 
+-- Below are some query examples based on the JSON capability
+
+-- Convert the date to a timestamp with time zone
+SELECT (txn->>'time_as_date')::TIMESTAMP WITH TIME ZONE FROM blockchain_txn_s3 LIMIT 10;
+
+-- Try to get to the elements of the arrays
+-- See https://stackoverflow.com/questions/22736742/query-for-array-elements-inside-json-type
+SELECT txn->>'hash', JSON_ARRAY_ELEMENTS(txn->'inputs') FROM blockchain_txn_s3 LIMIT 5;
 
