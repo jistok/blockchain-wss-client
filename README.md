@@ -120,4 +120,5 @@
 * Import data to a region: `gfsh>import data --region=/BlockchainItem --file=/tmp/BlockchainItem.gfd --member=server`
 * Connect to a locator (from gfsh): `gfsh>connect --locator=localhost[10334]`
 * [MADlib's graph algorithms](http://madlib.apache.org/docs/latest/group__grp__graph.html)
+* D3.js [bar graph example](http://bl.ocks.org/d3noob/8952219)
 

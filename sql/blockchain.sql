@@ -151,7 +151,8 @@ GROUP BY dow
 ORDER BY dow ASC;
 
 -- Get a histogram of amount of coin transacted by hour of the day (in the US East time zone)
-SELECT DATE_PART('hour', t.time) hour_of_day, SUM(i.value / 100000000.0)::NUMERIC(20, 2) sum
+-- Units of bitcoin are THOUSANDS.  This is intended to feed a d3.js bar graph display
+SELECT LPAD(DATE_PART('hour', t.time)::TEXT, 2, '0') || ':00' hour_of_day, (((SUM(i.value / 100000000.0))/1000.0)::BIGINT) sum
 FROM blockchain_txn t, blockchain_item i
 WHERE t.hash = i.hash
 GROUP BY hour_of_day
