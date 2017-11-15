@@ -53,10 +53,26 @@ SELECT (txn->>'time_as_date')::TIMESTAMP WITH TIME ZONE FROM blockchain_txn_s3 L
 -- See https://stackoverflow.com/questions/22736742/query-for-array-elements-inside-json-type
 SELECT txn->>'hash', JSON_ARRAY_ELEMENTS(txn->'inputs') FROM blockchain_txn_s3 LIMIT 5;
 
+-- Heap table(s) for this data
+DROP TABLE IF EXISTS blockchain_txn;
+CREATE TABLE blockchain_txn
+(
+  id TEXT -- This is synthetic: addr || '-' || tx_index (see the BlockchainItem class)
+  , hash TEXT -- This is the FK to the parent BlockchainTxn
+  , direction TEXT
+  , spent BOOLEAN
+  , tx_index BIGINT
+  , type INT
+  , addr TEXT
+  , value BIGINT
+  , n INT
+  , script TEXT
+)
+WITH (APPENDONLY=true, COMPRESSTYPE=ZLIB)
+DISTRIBUTED BY (id);
+
 -- From Alastair Turner
-/*
-item_body | {"spent":true,"tx_index":301154438,"type":0,"addr":"1MLVLhwWyq6FjgeD9akgnPLHo4e4bTqpB4","value":1404965648,"n":0,"script":"76a914df121366c1c71a92110c5e19116549f8d267cf9d88ac","id":"1MLVLhwWyq6FjgeD9akgnPLHo4e4bTqpB4-301154438"}
-*/
+INSERT INTO blockchain_item
 WITH inputs AS (
   SELECT txn->>'hash' AS hash, 'in'::varchar AS direction, json_array_elements(json_extract_path(txn, 'inputs'))->'prev_out' AS item_body
     FROM blockchain_txn_s3
@@ -73,16 +89,15 @@ all_items AS (
 SELECT
   -- NOTE: this would be the DDL for the blockchain_item table
   (item_body->>'id')::TEXT id -- This is synthetic: addr || '-' || tx_index (see the BlockchainItem class)
-  , hash -- This is the FK to the parent BlockchainTxn
+  , hash::TEXT -- This is the FK to the parent BlockchainTxn
   , direction
   , (item_body->>'spent')::BOOLEAN spent
-  , (item_body->>'tx_index') tx_index
   , (item_body->>'tx_index')::BIGINT tx_index
   , (item_body->>'type')::INT type
-  , (item_body->>'addr') addr
+  , (item_body->>'addr')::TEXT addr
   , (item_body->>'value')::BIGINT value
   , (item_body->>'n')::INT n
   , (item_body->>'script')::TEXT script
-  FROM all_items LIMIT 5;
+FROM all_items;
 
 
