@@ -134,3 +134,26 @@ SELECT
 FROM all_items;
 ANALYZE blockchain_item;
 
+-- Get a histogram of amount of coin transacted by day of week
+SELECT DATE_PART('dow', t.time) dow, SUM(i.value / 100000000.0)::NUMERIC(20, 2) sum
+FROM blockchain_txn t, blockchain_item i
+WHERE t.hash = i.hash
+GROUP BY dow
+ORDER BY dow ASC;
+
+-- Get a histogram of amount of coin transacted by day of week, but naming the days
+SELECT
+  (ARRAY['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])[DATE_PART('dow', t.time) + 1] dow,
+  SUM(i.value / 100000000.0)::NUMERIC(20, 2) sum
+FROM blockchain_txn t, blockchain_item i
+WHERE t.hash = i.hash
+GROUP BY dow
+ORDER BY dow ASC;
+
+-- Get a histogram of amount of coin transacted by hour of the day (in the US East time zone)
+SELECT DATE_PART('hour', t.time) hour_of_day, SUM(i.value / 100000000.0)::NUMERIC(20, 2) sum
+FROM blockchain_txn t, blockchain_item i
+WHERE t.hash = i.hash
+GROUP BY hour_of_day
+ORDER BY hour_of_day ASC;
+
