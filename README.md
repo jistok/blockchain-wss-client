@@ -35,6 +35,21 @@
     $ mvn clean install
     ```
 
+## Install, configure, and start GemFire
+
+* Save this directory: `pushd .`
+* Download the archive from Pivotal Network
+* Extract somewhere: `cd /opt/ ; sudo unzip ~/Downloads/pivotal-gemfire-9.1.1`
+* Set `PATH`: `cd ./pivotal-gemfire-9.1.1/ ; export PATH=$PWD/bin:$PATH`
+* Change back into this GitHub repo directory: `popd`
+* Start a locator: `gfsh -e "start locator --name=locator --classpath=$PWD/target/classes"`
+* Edit the [server cache XML file](./src/main/resources/serverCache.xml), replacing the following tokens with appropriate values: `us-west-2, YOUR_S3_BUCKET_NAME, YOUR_S3_ACCESS_KEY_ID, YOUR_S3_SECRET_KEY`
+* Generate the string passed via `--classpath=` when staring the server: `./generate_classpath_for_gemfire_server.sh`.  That last line of output is what you replace `CLASSPATH` with in the next step.  This step basically dumps all JAR file dependencies into the `./lib` directory of this project (it also creates this directory).
+* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml --locators=localhost[10334] --classpath=CLASSPATH"`
+* Start up the Pulse web UI: `gfsh -e "start pulse"`
+* This should direct your browser to the Pulse UI, where you enter _admin_ for user name, and _admin_ for password
+
+
 ## Build this app
 
 1. Edit the [properties file](./src/main/resources/application.properties) to suit your installation
@@ -94,20 +109,6 @@
 }
 ```
 
-## Install, configure, and start GemFire
-
-* Save this directory: `pushd .`
-* Download the archive from Pivotal Network
-* Extract somewhere: `cd /opt/ ; sudo unzip ~/Downloads/pivotal-gemfire-9.1.1`
-* Set `PATH`: `cd ./pivotal-gemfire-9.1.1/ ; export PATH=$PWD/bin:$PATH`
-* Change back into this GitHub repo directory: `popd`
-* Start a locator: `gfsh -e "start locator --name=locator --classpath=$PWD/target/classes"`
-* Edit the [server cache XML file](./src/main/resources/serverCache.xml), replacing the following tokens with appropriate values: `us-west-2, YOUR_S3_BUCKET_NAME, YOUR_S3_ACCESS_KEY_ID, YOUR_S3_SECRET_KEY`
-* Generate the string passed via `--classpath=` when staring the server: `./generate_classpath_for_gemfire_server.sh`.  That last line of output is what you replace `CLASSPATH` with in the next step.  This step basically dumps all JAR file dependencies into the `./lib` directory of this project (it also creates this directory).
-* Start a server: `gfsh -e "start server --name=server --cache-xml-file=./src/main/resources/serverCache.xml --locators=localhost[10334] --classpath=CLASSPATH"`
-* Start up the Pulse web UI: `gfsh -e "start pulse"`
-* This should direct your browser to the Pulse UI, where you enter _admin_ for user name, and _admin_ for password
-
 ## Potentially Useful References
 * An OReilly [title](http://chimera.labs.oreilly.com/books/1234000001802/ch05.html#tx_lifecycle)
 * To redirect from a Spring Boot endpoint to our WS server, you can just return `redirect:<uri>` from a `@Controller`, or a `RedirectView`
@@ -118,4 +119,5 @@
 * Export data from a region: `gfsh>export data --region=/BlockchainItem --file=/tmp/BlockchainItem.gfd --member=server`
 * Import data to a region: `gfsh>import data --region=/BlockchainItem --file=/tmp/BlockchainItem.gfd --member=server`
 * Connect to a locator (from gfsh): `gfsh>connect --locator=localhost[10334]`
+* [MADlib's graph algorithms](http://madlib.apache.org/docs/latest/group__grp__graph.html)
 
