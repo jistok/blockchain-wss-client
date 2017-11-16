@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.geode.cache.Region;
+import org.apache.geode.pdx.PdxInstance;
 
 import io.pivotal.dil.blockchain.entity.BlockchainItem;
 import io.pivotal.dil.blockchain.entity.BlockchainTxn;
@@ -41,7 +42,8 @@ public class BlockchainRestController {
 	@RequestMapping(method = RequestMethod.GET, value = "/getTxn/{hash}")
 	public String getBlockchainTxnFromHash(@PathVariable String hash) {
 		String rv = "{}";
-		BlockchainTxn txn = blockchainTxnRegion.get(hash);
+		PdxInstance value = (PdxInstance) blockchainTxnRegion.get(hash);
+		BlockchainTxn txn = (BlockchainTxn) value.getObject();
 		if (txn != null) {
 			try {
 				rv = txn.toJSON();
