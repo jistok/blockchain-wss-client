@@ -69,8 +69,7 @@ public class BlockchainRestController {
 		String rv = gpdbResultRegion.get(key);
 		if (null == rv) {
 			// Run query against GPDB
-			// Ref. https://www.mkyong.com/spring/spring-jdbctemplate-querying-examples/
-			List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+			// Ref. https://www.mkyong.com/spring/spring-jdbctemplate-querying-examples
 			List<String> result = new ArrayList<String>();
 			for (Map<String, Object> row : jdbcTemplate.queryForList(sql)) {
 				result.add((String) row.get("hour_of_day") + "," + row.get("sum"));
