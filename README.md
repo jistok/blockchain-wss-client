@@ -60,6 +60,12 @@
 
 **NOTE:** this app listens on ports 8080 (HTTP) and 18080 (WS server)
 
+## Available endpoints
+* `http://server:port/` provides the animated view of Bitcoin transactions
+* `http://server:port/graph_volume_vs_hour.html` yields a graph of transaction volumes across the hours in the day
+
+![Example graph of transaction volume vs. hour in the day](./images/graph_txn_vs_hour_of_day.png)
+
 ## Data sample
 
 ```

@@ -46,6 +46,10 @@
 		<region-attributes refid="REPLICATE" async-event-queue-ids="s3q" />
 	</region>
 
+	<region name="gpdbResult">
+		<region-attributes refid="REPLICATE" />
+	</region>
+
 	<resource-manager eviction-heap-percentage="70"
 		critical-heap-percentage="80" />
 

@@ -69,4 +69,11 @@ public class GemfireConfiguration {
 		return crf.create("BlockchainItem");
 	}
 
+	// Cache of generic query results from GPDB
+	@Bean
+	public Region<String, String> gpdbResultRegion(ClientCache cache) {
+		ClientRegionFactory<String, String> crf = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
+		return crf.create("gpdbResult");
+	}
+
 }
