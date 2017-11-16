@@ -49,6 +49,17 @@
 * Start up the Pulse web UI: `gfsh -e "start pulse"`
 * This should direct your browser to the Pulse UI, where you enter _admin_ for user name, and _admin_ for password
 
+## Install, configure, and start Greenplum Database (GPDB)
+
+* Use the [GPDB marketplace offering](https://aws.amazon.com/marketplace/pp/B06XKQ8Z3H) in AWS
+* Follow the directions there
+* Run the relevant DDL operations in [this file](./sql/blockchain.sql)
+* This client app here assumes GPDB is accessible on `localhost`, so you will need to create an SSH tunnel; here's an example:
+```
+  ssh -i ./your_vm_ssh_key.pem -f gpadmin@11.22.33.44 -L 10432:localhost:10432 -N
+```
+That will fork and run in the background
+* If you need to alter the credentials, host, or port, do that [here](./src/main/resources/application.properties)
 
 ## Build this app
 
