@@ -9,7 +9,7 @@ echo "Copying all project JARs into ./lib"
 ./mvnw dependency:copy-dependencies
 
 cp=$PWD/target/classes
-for jar in $( find $PWD/lib -name '*.jar' | egrep -v '(gemfire|geode)' )
+for jar in $( find $PWD/lib -name '*.jar' | egrep -v '^/.+?/(gemfire|geode)\-.+?\.jar$' )
 do
   cp+=":$jar"
 done
