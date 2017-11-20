@@ -38,7 +38,9 @@ CREATE EXTERNAL TABLE blockchain_txn_s3
 -- LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn config=/home/gpadmin/s3.conf')
 /* Only the data for November 14, 2017: */
 --LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/20171114 config=/home/gpadmin/s3.conf')
-LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/201711 config=/home/gpadmin/s3.conf')
+--LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/201711 config=/home/gpadmin/s3.conf')
+--LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/201711 config=/home/gpadmin/s3.conf')
+LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/20171120 config=/home/gpadmin/s3.conf')
 FORMAT 'TEXT' (DELIMITER 'OFF' NULL '\N' ESCAPE '\');
 
 -- TODO: Use the above approach to build up an external partition setup
@@ -157,4 +159,27 @@ FROM blockchain_txn t, blockchain_item i
 WHERE t.hash = i.hash
 GROUP BY hour_of_day
 ORDER BY hour_of_day ASC;
+
+-- Check for duplicate transactions?
+WITH x AS (
+  SELECT hash, COUNT(*) cnt FROM blockchain_txn
+  GROUP BY 1 ORDER BY 2
+)
+SELECT COUNT(*) FROM x WHERE x.cnt > 1;
+
+-- Query the S3 external table directly, to verify the most recent data in S3
+SELECT
+  (txn->>'hash')::TEXT
+  , (txn->>'lock_time')::INT
+  , (txn->>'relayed_by')::TEXT
+  , (txn->>'size')::INT
+  , TO_TIMESTAMP((txn->>'time')::INT)::TIMESTAMP WITH TIME ZONE txn_date
+  , (txn->>'tx_index')::BIGINT
+  , (txn->>'ver')::INT
+  , (txn->>'vin_sz')::INT
+  , (txn->>'vout_sz')::INT
+FROM blockchain_txn_s3
+ORDER BY txn_date DESC
+LIMIT 10;
+
 
