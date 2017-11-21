@@ -40,7 +40,8 @@ CREATE EXTERNAL TABLE blockchain_txn_s3
 --LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/20171114 config=/home/gpadmin/s3.conf')
 --LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.dil.blockchain/BlockchainTxn/201711 config=/home/gpadmin/s3.conf')
 --LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/201711 config=/home/gpadmin/s3.conf')
-LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/20171120 config=/home/gpadmin/s3.conf')
+--LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/20171120-19 config=/home/gpadmin/s3.conf')
+LOCATION('s3://s3-us-west-2.amazonaws.com/io.pivotal.reinvent.demo/BlockchainTxn/20171121 config=/home/gpadmin/s3.conf')
 FORMAT 'TEXT' (DELIMITER 'OFF' NULL '\N' ESCAPE '\');
 
 -- TODO: Use the above approach to build up an external partition setup
@@ -53,8 +54,6 @@ SELECT (txn->>'time_as_date')::TIMESTAMP WITH TIME ZONE FROM blockchain_txn_s3 L
 -- Try to get to the elements of the arrays
 -- See https://stackoverflow.com/questions/22736742/query-for-array-elements-inside-json-type
 SELECT txn->>'hash', JSON_ARRAY_ELEMENTS(txn->'inputs') FROM blockchain_txn_s3 LIMIT 5;
-
-
 
 -- Heap table for BlockchainTxn data
 DROP TABLE IF EXISTS blockchain_txn;

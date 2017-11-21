@@ -17,17 +17,18 @@ public class BlockchainWssClientApplication {
 
 	// This is how transactions get passed from client to server
 	protected static final BlockingQueue<String> TXN_QUEUE = new LinkedBlockingDeque<>(QUEUE_CAPACITY);
-	
+
 	@SuppressWarnings("unused")
 	private BlockchainWssServer wsServer;
-	
+
 	public BlockchainWssClientApplication(BlockchainWssServer wsServer) {
 		this.wsServer = wsServer;
 		wsServer.start();
 		LOG.info("Server started on port: " + wsServer.getPort());
 	}
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(BlockchainWssClientApplication.class, args);
 	}
+
 }
