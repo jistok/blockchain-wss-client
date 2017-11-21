@@ -138,4 +138,5 @@ That will fork and run in the background
 * Connect to a locator (from gfsh): `gfsh>connect --locator=localhost[10334]`
 * [MADlib's graph algorithms](http://madlib.apache.org/docs/latest/group__grp__graph.html)
 * D3.js [bar graph example](http://bl.ocks.org/d3noob/8952219)
+* An [article](http://www.baeldung.com/spring-scheduled-tasks) on the Spring `@Scheduled` annotation
 
