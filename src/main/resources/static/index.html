@@ -4,12 +4,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>VivaGraphs webgl dynamic graph test page</title>
         
-        <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/vivagraphjs/0.10.0/vivagraph.min.js"></script -->
         <script src="js/vivagraph.min.js"></script>
 
         <script src="js/jquery-3.2.0.min.js"></script>
         <script src="js/jquery.simple.websocket.min.js"></script>
-        <!-- script src="js/websocketConfig.js"></script -->
+
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="js/hourlyVolume.js"></script>
 
         <style type='text/css'>
             .node {
@@ -22,17 +23,35 @@
                 background-color: #dddddd;
                 position: absolute;
             }
-            #graph1{
+            #graph1 {
                 position: absolute;
-                width: 100%;
+                width: 75%;
                 height: 100%;
+            }
+
+            /* This is for the bar graph(s) */
+            .axis {
+              font: 10px sans-serif;
+            }
+            .axis path,
+            .axis line {
+              fill: none;
+              stroke: #000;
+              shape-rendering: crispEdges;
+            }
+            .chart {
+                background-color: #ffffff;
+                width: 25%;
             }
         </style>
     </head>
 
     <body onload="onLoad()" style="background-color: black;">
         <div id='graph1'></div>
-
         <script src="js/appMain.js"></script>
+
+        <div class="chart">
+          <svg class="hourly_volume"></svg>
+        </div>
     </body>
 </html>
