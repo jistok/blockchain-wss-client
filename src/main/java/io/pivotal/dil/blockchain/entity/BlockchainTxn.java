@@ -30,7 +30,7 @@ public class BlockchainTxn {
 	private List<BlockchainItem> out;
 	// Derived from time field
 	private Date timeAsDate;
-	
+
 	// The ID used to put/get these
 	public String getId() {
 		return hash;
@@ -46,7 +46,7 @@ public class BlockchainTxn {
 	public BlockchainTxn() {
 		super();
 	}
-	
+
 	public String toJSON() throws JsonProcessingException {
 		return mapper.writeValueAsString(this);
 	}
@@ -59,33 +59,37 @@ public class BlockchainTxn {
 	public String getTimeAsString() {
 		return timeAsDate.toString();
 	}
-	
+
 	public static BlockchainTxn fromJSON(String jsonString) {
 		BlockchainTxn rv = null;
 		try {
-			JSONObject x = new JSONObject(jsonString).getJSONObject("x");
-			rv = new BlockchainTxn();
-			rv.lockTime = x.getLong("lock_time");
-			rv.ver = x.getInt("ver");
-			rv.size = x.getInt("size");
-			rv.time = x.getLong("time");
-			rv.timeAsDate = new Date(rv.time * 1000);
-			rv.txIndex = x.getLong("tx_index");
-			rv.vinSz = x.getInt("vin_sz");
-			rv.hash = x.getString("hash");
-			rv.voutSz = x.getInt("vout_sz");
-			rv.relayedBy = x.getString("relayed_by");
-			// Add the inputs
-			rv.inputs = new ArrayList<>(rv.vinSz);
-			JSONArray inputArray = x.getJSONArray("inputs");
-			for (int i = 0; i < inputArray.length(); i++) {
-				rv.inputs.add(BlockchainInput.fromJSONObject(inputArray.getJSONObject(i)));
-			}
-			// Add the outputs
-			rv.out = new ArrayList<>(rv.voutSz);
-			JSONArray outArray = x.getJSONArray("out");
-			for (int i = 0; i < outArray.length(); i++) {
-				rv.out.add(BlockchainItem.fromJSONObject(outArray.getJSONObject(i)));
+			JSONObject obj = new JSONObject(jsonString);
+			// Verify this is the blockchain data and not some other type
+			if (obj.has("op") && "utx".equals(obj.get("op"))) {
+				JSONObject x = obj.getJSONObject("x");
+				rv = new BlockchainTxn();
+				rv.lockTime = x.getLong("lock_time");
+				rv.ver = x.getInt("ver");
+				rv.size = x.getInt("size");
+				rv.time = x.getLong("time");
+				rv.timeAsDate = new Date(rv.time * 1000);
+				rv.txIndex = x.getLong("tx_index");
+				rv.vinSz = x.getInt("vin_sz");
+				rv.hash = x.getString("hash");
+				rv.voutSz = x.getInt("vout_sz");
+				rv.relayedBy = x.getString("relayed_by");
+				// Add the inputs
+				rv.inputs = new ArrayList<>(rv.vinSz);
+				JSONArray inputArray = x.getJSONArray("inputs");
+				for (int i = 0; i < inputArray.length(); i++) {
+					rv.inputs.add(BlockchainInput.fromJSONObject(inputArray.getJSONObject(i)));
+				}
+				// Add the outputs
+				rv.out = new ArrayList<>(rv.voutSz);
+				JSONArray outArray = x.getJSONArray("out");
+				for (int i = 0; i < outArray.length(); i++) {
+					rv.out.add(BlockchainItem.fromJSONObject(outArray.getJSONObject(i)));
+				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

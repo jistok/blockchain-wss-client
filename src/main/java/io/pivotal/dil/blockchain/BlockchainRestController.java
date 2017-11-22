@@ -115,13 +115,11 @@ public class BlockchainRestController {
 			gpdbResultRegion.put(key, rv);
 		}
 		LOG.info("@Scheduled: populateByHourChart() => " + rv);
-		/* FIXME: THIS IS BROKEN DUE TO ASSUMPTIONS MADE ON THE CONSUMER END OF THIS QUEUE
 		try {
 			BlockchainWssClientApplication.TXN_QUEUE.put(rv);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-		*/
 	}
 
 }

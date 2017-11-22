@@ -106,15 +106,13 @@ public class BlockchainWssServer extends WebSocketServer {
 					try {
 						msg = BlockchainWssClientApplication.TXN_QUEUE.poll(QUEUE_MAX_WAIT_TIME_SECONDS,
 								TimeUnit.SECONDS);
-						BlockchainTxn txn = null;
-						if (msg != null) {
-							txn = BlockchainTxn.fromJSON(msg);
-							broadcast(msg);
-						} else {
+						if (msg == null) {
 							// We don't have data, so we assume our WS client got disconnected
 							startWsClient(); // Restart here as it appears it was closed by upstream server
 							continue;
 						}
+						broadcast(msg);
+						BlockchainTxn txn = BlockchainTxn.fromJSON(msg);
 						String statusMsg = "No BlockchainTxn";
 						if (txn != null) {
 							nMessages++;
@@ -138,7 +136,7 @@ public class BlockchainWssServer extends WebSocketServer {
 							lastTimeReported = now;
 						}
 						LOG.debug(statusMsg);
-						LOG.debug(txn.toJSON());
+						LOG.debug(txn == null ? "null" : txn.toJSON());
 					} catch (InterruptedException | JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}
