@@ -14,13 +14,13 @@ public class BarChartData {
 		mapper = new ObjectMapper();
 		mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
 	}
-	private String chartName; // e.g. "hourly_volume"
+	private String op; // e.g. "hourly_volume"
 	// Map key: column name, map value: column value
 	// List<Map<String, Object>> l = jdbcTemplate.queryForList(sql);
 	private List<Map<String,Object>> rows;
 	
-	public BarChartData(String chartName, List<Map<String, Object>> rows) {
-		this.chartName = chartName;
+	public BarChartData(String op, List<Map<String, Object>> rows) {
+		this.op = op;
 		this.rows = rows;
 	}
 	
@@ -28,8 +28,8 @@ public class BarChartData {
 		return mapper.writeValueAsString(this);
 	}
 
-	public String getChartName() {
-		return chartName;
+	public String getOp() {
+		return op;
 	}
 
 	public List<Map<String, Object>> getRows() {

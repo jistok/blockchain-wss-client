@@ -96,8 +96,10 @@ public class BlockchainRestController {
 		// TODO: Run the chart query and stick into TXN_QUEUE with a specific key, like
 		// { 'key': 'whole text ... CSV' }
 		String sql = "SELECT\n" + "LPAD(DATE_PART('hour', t.time)::TEXT, 2, '0') || ':00' hour_of_day,\n"
-				+ "(((SUM(i.value / 100000000.0))/1000.0)::BIGINT) sum\n" + "FROM blockchain_txn t, blockchain_item i\n"
-				+ "WHERE t.hash = i.hash\n" + "GROUP BY hour_of_day\n" + "ORDER BY hour_of_day ASC;";
+				+ "(((SUM(i.value / 100000000.0))/1000.0)::BIGINT) sum\n"
+				+ "FROM blockchain_txn t, blockchain_item i\n"
+				+ "WHERE t.hash = i.hash\n" + "GROUP BY hour_of_day\n"
+				+ "ORDER BY hour_of_day ASC;";
 		Date now = new Date();
 		DateFormat dateToTheHour = new SimpleDateFormat("yyyyMMddHH");
 		String key = DigestUtils.sha256Hex(sql) + "-json-" + dateToTheHour.format(now);
