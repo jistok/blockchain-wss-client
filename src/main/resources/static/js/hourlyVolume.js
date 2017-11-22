@@ -28,6 +28,8 @@ var svg = d3.select(".hourly_volume")
 // Arg is the "rows" attribute of that JSON
 function buildChart (data) {
 
+    console.log("buildChart() called with data length " + data.length);
+
     data.forEach(function(d) {
         d.date = d.hour_of_day;
         d.value = +d.sum;
