@@ -17,7 +17,7 @@ var yAxis = d3.svg.axis()
     .orient("left")
     .ticks(10);
 
-var svg = d3.select(".hourly_volume")
+var svg = d3.select(".hourly_volume").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -26,13 +26,16 @@ var svg = d3.select(".hourly_volume")
 
 // Call this when data for this chart arrives via the websocket
 // Arg is the "rows" attribute of that JSON
+// Ref. on updating:
+//  http://bl.ocks.org/d3noob/7030f35b72de721622b8
+//  http://bl.ocks.org/d3noob/6bd13f974d6516f3e491
 function buildChart (data) {
 
     console.log("buildChart() called with data length " + data.length);
 
     data.forEach(function(d) {
-        d.date = d.hour_of_day;
-        d.value = +d.sum;
+        d.hour_of_day = d.hour_of_day;
+        d.sum = +d.sum;
     });
 	
   x.domain(data.map(function(d) { return d.hour_of_day; }));
@@ -56,7 +59,6 @@ function buildChart (data) {
       .attr("y", -50)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      //.style("alignment-baseline", "central")
       .text("Value (BTC, thousands)");
 
   svg.selectAll("bar")
@@ -69,4 +71,9 @@ function buildChart (data) {
       .attr("height", function(d) { return height - y(d.sum); });
 
 }
+
+// Initial build of chart with no data
+var initialData = [{"hour_of_day":"00:00","sum":0},{"hour_of_day":"01:00","sum":0},{"hour_of_day":"02:00","sum":0},{"hour_of_day":"03:00","sum":0},{"hour_of_day":"04:00","sum":0},{"hour_of_day":"05:00","sum":0},{"hour_of_day":"06:00","sum":0},{"hour_of_day":"07:00","sum":0},{"hour_of_day":"08:00","sum":0},{"hour_of_day":"09:00","sum":0},{"hour_of_day":"10:00","sum":0},{"hour_of_day":"11:00","sum":0},{"hour_of_day":"12:00","sum":0},{"hour_of_day":"13:00","sum":0},{"hour_of_day":"14:00","sum":0},{"hour_of_day":"15:00","sum":0},{"hour_of_day":"16:00","sum":0},{"hour_of_day":"17:00","sum":0},{"hour_of_day":"18:00","sum":0},{"hour_of_day":"19:00","sum":0},{"hour_of_day":"20:00","sum":0},{"hour_of_day":"21:00","sum":0},{"hour_of_day":"22:00","sum":0},{"hour_of_day":"23:00","sum":0}];
+
+buildChart(initialData);
 

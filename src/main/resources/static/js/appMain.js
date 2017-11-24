@@ -142,8 +142,7 @@ function onLoad() {
         if ( message['op'] == 'pong' ) {
             return;
         } else if (message["op"] == "hourly_volume") {
-        		// TODO: Do the chart (I DO GET THAT WE DON'T NEED CSV, BUT ANYHOW ...)
-            buildChart(message["rows"]);
+            buildChart(message["rows"]); // Defined in ./js/hourlyVolume.js
         } else {
             var txAddress = txAddress = message['x']['hash'];
 

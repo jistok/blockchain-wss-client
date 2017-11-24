@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+  <title>Graph / Websocket test page</title>
+ 
+  <style type='text/css'>
+      /* This is for the bar graph(s) */
+      .axis {
+        font: 10px sans-serif;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+  </style>
+</head>
+
+<body>
+  <div class="hourly_volume"></div>
+  <!-- Websocket --> 
+  <script src="js/jquery-3.2.0.min.js"></script>
+  <script src="js/jquery.simple.websocket.min.js"></script>
+
+  <!-- Chart -->
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="js/hourlyVolume.js"></script>
+  <script>
+   var blockchainWebSocket = $.simpleWebSocket(
+        {
+          url: 'ws://' + window.location.href.split('//')[1].split(':')[0] + ':18080'
+          , dataType: 'json'
+        }
+   );
+
+   blockchainWebSocket.listen(function(message) {
+      try {
+          if ( message['op'] == 'pong' ) {
+            console.log("Got a 'pong'");
+          } else if (message["op"] == "hourly_volume") {
+              buildChart(message["rows"]); // Defined in js/hourlyVolume.js
+          } else if (message["op"] == "utx") {
+            // console.log("Got a 'utx'");
+          } else {
+            console.log("Got some other message");
+          }
+      } catch (err) {
+          if (err != null) { 
+            console.log(err.message); 
+          }
+      }
+    }).fail(function(e) {
+        console.log(e);
+    });
+  </script>
+</body>
+
