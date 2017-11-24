@@ -116,7 +116,7 @@ public class BlockchainRestController {
 			// Store this back into Gemfire
 			gpdbResultRegion.put(key, rv);
 		}
-		LOG.info("@Scheduled: populateByHourChart() => " + rv);
+		LOG.debug("@Scheduled: populateByHourChart() => " + rv);
 		try {
 			BlockchainWssClientApplication.TXN_QUEUE.put(rv);
 		} catch (InterruptedException e) {
