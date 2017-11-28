@@ -143,13 +143,20 @@ GROUP BY dow
 ORDER BY dow ASC;
 
 -- Get a histogram of amount of coin transacted by day of week, but naming the days
+WITH by_dow AS (
 SELECT
-  (ARRAY['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])[DATE_PART('dow', t.time) + 1] dow,
-  SUM(i.value / 100000000.0)::NUMERIC(20, 2) sum
+  (DATE_PART('dow', t.time) + 1)::INT day_num,
+  (((SUM(i.value / 100000000.0))/1000.0)::BIGINT) sum
 FROM blockchain_txn t, blockchain_item i
 WHERE t.hash = i.hash
-GROUP BY dow
-ORDER BY dow ASC;
+GROUP BY day_num
+)
+SELECT
+  day_num
+  , (ARRAY['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])[day_num] dow
+  , sum
+FROM by_dow
+ORDER BY day_num ASC;
 
 -- Get a histogram of amount of coin transacted by hour of the day (in the US East time zone)
 -- Units of bitcoin are THOUSANDS.  This is intended to feed a d3.js bar graph display
