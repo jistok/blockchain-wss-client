@@ -1,99 +1,159 @@
-<html>
-<meta charset="utf-8">
+<!DOCTYPE html>
 <head>
-  <title>Graph of Bitcoin volume vs. hour of the day</title>
-	<style>
-
-	.axis {
-	  font: 10px sans-serif;
-	}
-
-	.axis path,
-	.axis line {
-	  fill: none;
-	  stroke: #000;
-	  shape-rendering: crispEdges;
-	}
-
-	</style>
+<title>Bitcoin Transaction Volume vs. Hour of Day</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!-- Websocket --> 
+<script src="js/jquery-3.2.0.min.js"></script>
+<script src="js/jquery.simple.websocket.min.js"></script>
 </head>
+
+<style>
+h2 {
+	text-align: center;
+}
+</style>
+
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+ <div>&nbsp;</div>
+ <div class="container">
+  <svg class="chart">
+  </svg>
+ </div>
+</body>
+
 <script>
 
-var dataURL = "/hourly-volume.csv";
-
-var margin = {top: 20, right: 20, bottom: 70, left: 40},
-    width = 600 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
-
-// Parse the date / time
-var	parseDate = d3.time.format("%Y-%m").parse;
-
-var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
-
-var y = d3.scale.linear().range([height, 0]);
-
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom")
-    .ticks(24);
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(10);
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", 
-          "translate(" + margin.left + "," + margin.top + ")");
-
-//d3.csv("bar-data.csv", function(error, data) {
-d3.csv(dataURL, function(error, data) {
-
-    data.forEach(function(d) {
-        d.date = d.hour
-        d.value = +d.value;
-    });
+function update(data)
+{
+	//set domain for the x axis
+	xChart.domain(data.map(function(d){ return d.hour_of_day; }) );
+	//set domain for y axis
+	yChart.domain( [0, d3.max(data, function(d){ return +d.sum; })] );
 	
-  x.domain(data.map(function(d) { return d.date; }));
-  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+	//get the width of each bar 
+	var barWidth = width / data.length;
+	
+	//select all bars on the graph, take them out, and exit the previous data set. 
+	//then you can add/enter the new data set
+	var bars = chart.selectAll(".bar")
+					.remove()
+					.exit()
+					.data(data)		
+	//now actually give each rectangle the corresponding data
+  var currHour = new Date().getHours();
+	bars.enter()
+		.append("rect")
+		.attr("class", "bar")
+		.attr("x", function(d, i){ return i * barWidth + 1 })
+		.attr("y", function(d){ return yChart( d.sum); })
+		.attr("height", function(d){ return height - yChart(d.sum); })
+		.attr("width", barWidth - 1)
+		.attr("fill", function(d) {
+			if(d.hour_of_day.split(":")[0] == currHour) {
+				return "#49AB9E";
+			} else {
+				return "#EB973D";
+			}
+		});
+	//left axis
+	chart.select('.y')
+		  .call(yAxis)
+	//bottom axis
+	chart.select('.xAxis')
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.selectAll("text")
+			.style("text-anchor", "end")
+			.attr("dx", "-.8em")
+			.attr("dy", ".15em")
+			.attr("transform", function(d){
+				return "rotate(-65)";
+			});
+			
+}//end update
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-    .selectAll("text")
-      .style("text-anchor", "end")
-      .attr("dx", "-.8em")
-      .attr("dy", "-.55em")
-      .attr("transform", "rotate(-90)" );
+//set up chart
+var margin = {top: 30, right: 20, bottom: 95, left: 60};
+var width = 800;
+var height = 500;
 
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Value (BTC, thousands)");
+var chart = d3.select(".chart")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  svg.selectAll("bar")
-      .data(data)
-    .enter().append("rect")
-      .style("fill", "#EB973D") // Bitcoin logo color
-      .attr("x", function(d) { return x(d.date); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return height - y(d.value); });
+var xChart = d3.scaleBand()
+				.range([0, width]);
+				
+var yChart = d3.scaleLinear()
+				.range([height, 0]);
 
+var xAxis = d3.axisBottom(xChart);
+var yAxis = d3.axisLeft(yChart);
+
+//set up axes
+//left axis
+	chart.append("g")
+		  .attr("class", "y axis")
+		  .call(yAxis)
+		  
+	//bottom axis
+	chart.append("g")
+		.attr("class", "xAxis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.selectAll("text")
+			.style("text-anchor", "end")
+			.attr("dx", "-.8em")
+			.attr("dy", ".15em")
+			.attr("transform", function(d){
+				return "rotate(-65)";
+			});
+
+// Add title
+chart
+  .append("text")
+  .attr("x", (width / 2))             
+  .attr("y", 0 - (margin.top / 2))
+  .attr("text-anchor", "middle")  
+  .style("font-size", "18px") 
+  .style("text-decoration", "underline")  
+  .text("Bitcoin Transaction Volume vs. Hour of Day");
+
+// Add labels
+chart
+	.append("text")
+  // MIKE: had to try various values in the denominator to center the label
+	.attr("transform", "translate(-45," +  (height + margin.bottom) / 1.7 + ") rotate(-90)")
+	.text("Transaction Volume (BTC, thousands)");
+		
+chart
+	.append("text")
+	.attr("transform", "translate(" + (width/2) + "," + (height + margin.bottom - 3) + ")")
+	.text("Hour of Day");
+
+var blockchainWebSocket = $.simpleWebSocket(
+        {
+          url: 'ws://' + window.location.href.split('//')[1].split(':')[0] + ':18080'
+          , dataType: 'json'
+        }
+);
+
+blockchainWebSocket.listen(function(message)
+{
+  try {
+    if (message["op"] == "hourly_volume") {
+        update(message["rows"]);
+    }
+  } catch (err) {
+          if (err != null) { 
+            console.log(err.message); 
+          }
+  }
+}).fail(function(e) {
+        console.log(e);
 });
-
 </script>
-</body>
-</html>
 
