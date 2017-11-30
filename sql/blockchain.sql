@@ -188,4 +188,14 @@ FROM blockchain_txn_s3
 ORDER BY txn_date DESC
 LIMIT 10;
 
+-- This would help with the automation of data loading
+with max_so_far as (
+  select max(time) tmax from blockchain_txn
+)
+select
+  date_trunc('hour', tmax) t,
+  date_trunc('hour', tmax + interval '1 hour') t_1,
+  -- yyyyMMdd-HHmmss (this is the format specifier in the S3 writer code)
+  to_char(date_trunc('hour', tmax + interval '1 hour'), 'yyyyMMdd-HH24') fmt
+from max_so_far;
 
